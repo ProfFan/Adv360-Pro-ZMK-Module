@@ -1,8 +1,8 @@
-# Kinesis Advantage 360 Pro ZMK Config
+# Kinesis Advantage 360 Pro ZMK Module
 
 ## Modifying the keymap
 
-[The ZMK documentation](https://zmk.dev/docs) covers both basic and advanced functionality and has a table of OS compatibility for keycodes. Please note that the RGB Underglow, Backlight and Power Management sections are not relevant to the Advantage 360 Pro's custom ZMK fork. For more information see [this note](#note)
+[The ZMK documentation](https://zmk.dev/docs) covers both basic and advanced functionality and has a table of OS compatibility for keycodes. This repository is an external ZMK module for the Advantage 360 Pro. It builds against upstream ZMK using [config/west.yml](config/west.yml) and exposes the Adv360 board definitions through [zephyr/module.yml](zephyr/module.yml). The status LEDs are handled by this module's Adv360 status LED driver, not by ZMK RGB underglow.
 
 * If you would like to continue using GitHub we recommend using Nick Coutsos’s keymap editor: https://nickcoutsos.github.io/keymap-editor/.
 * If you would prefer to leave GitHub and firmware flashing behind you can perform a one-time firmware update to gain access to Clique. Get started here: https://kinesis-ergo.com/360p-clique-upgrade/.
@@ -103,15 +103,15 @@ Starting on 11/15/2023 the Advantage 360 Pro will now automatically record the c
 
 ## N-Key Rollover
 
-By default this keyboard has NKRO enabled, however for compatibility reasons the higher ranges are not enabled. If you want to use F13-F24 or the INTL1-9 keys with NKRO enabled you can change `CONFIG_ZMK_HID_KEYBOARD_EXTENDED_REPORT=n` to `CONFIG_ZMK_HID_KEYBOARD_EXTENDED_REPORT=y` in [adv360_left_defconfig](/config/boards/arm/adv360/adv360_left_defconfig#L65)
+By default this keyboard has NKRO enabled, however for compatibility reasons the higher ranges are not enabled. If you want to use F13-F24 or the INTL1-9 keys with NKRO enabled you can set `CONFIG_ZMK_HID_KEYBOARD_EXTENDED_REPORT=y` in [adv360_left_nrf52840_zmk_defconfig](boards/kinesis/adv360/adv360_left_nrf52840_zmk_defconfig).
 
 ## Battery reporting
 
-By default reporting the battery level over BLE is disabled as this can cause some computers to spontaneously wake up repeatedly. If you'd like to enable this functionality change `CONFIG_BT_BAS=n` to  `CONFIG_BT_BAS=y` in [adv360_left_defconfig](/config/boards/arm/adv360/adv360_left_defconfig#L58).
+By default reporting the battery level over BLE is disabled as this can cause some computers to spontaneously wake up repeatedly. If you'd like to enable this functionality change `CONFIG_BT_BAS=n` to `CONFIG_BT_BAS=y` in [adv360_left_nrf52840_zmk_defconfig](boards/kinesis/adv360/adv360_left_nrf52840_zmk_defconfig).
 
-## Modifier indicator color
+## Status LEDs
 
-The color of the CAPS/NUM/SCROLL LOCK indicator LEDs may be configured by specifying a hexadecimal RGB color code. For example, `CONFIG_ZMK_RGB_UNDERGLOW_MOD_COLOR=0xFF0000` would give red indicator colors. In order to set the indicator color on both modules, ensure that both [adv360_left_defconfig](/config/boards/arm/adv360/adv360_left_defconfig) and [adv360_right_defconfig](/config/boards/arm/adv360/adv360_right_defconfig) have been updated.
+The CAPS/NUM/SCROLL LOCK and layer LEDs are controlled by the module-local Adv360 status LED driver. Brightness defaults to `CONFIG_ZMK_ADV360_STATUS_LEDS_BRIGHTNESS=20` in [Kconfig](Kconfig) and can be overridden in the board defconfigs if needed. The `&stp STP_BAT` binding previews local battery level, and `&stp STP_TOG` toggles status LEDs on or off.
 
 ## Layer colors
 
@@ -130,29 +130,20 @@ A total of 32 layers are supported by ZMK, with the highest currently active lay
 
 ## Changelog
 
-The changelog for both the config repo and the underlying ZMK fork that the config repo builds against can be found [here](CHANGELOG.md).
+The changelog for this module and the ZMK revisions it has built against can be found [here](CHANGELOG.md).
 
 ## Beta testing
 
-The Advantage 360 Pro is always getting updates and refinements. If you are willing to beta test you can follow [this guide from ZMK](https://zmk.dev/docs/features/beta-testing#testing-features) on how to change where your config repo points to. The `west.yml` file that is mentioned is located in config/. [This link](config/west.yml) can take you to the file. Typically you will only need to change the `revision: ` to match the beta branch. There is currently no beta branch available for testing.
+The Advantage 360 Pro is always getting updates and refinements. If you are willing to beta test you can follow [this guide from ZMK](https://zmk.dev/docs/features/beta-testing#testing-features) on how to change which ZMK revision this module builds against. The `west.yml` file that is mentioned is located in config/. [This link](config/west.yml) can take you to the file. Typically you will only need to change the `revision: ` to match the beta branch. There is currently no beta branch available for testing.
 
-Feedback on beta branches should be submitted as a GitHub issue on the base ZMK repository as opposed to this config repository.
+Feedback on upstream ZMK beta branches should be submitted as a GitHub issue on the upstream ZMK repository as opposed to this module repository.
 
-In the event of a major update the beta branch may not be compatible with the current mainline version of the config repository. If this is the case it will be detailed here along with instructions on how to update.
+In the event of a major update the beta branch may not be compatible with the current mainline version of this module. If this is the case it will be detailed here along with instructions on how to update.
 
 ## Note
 
-By default this config repository references [a customised version of ZMK](https://github.com/ReFil/zmk/tree/adv360-z3.5) with Advantage 360 Pro specific functionality and changes over [base ZMK](https://github.com/zmkfirmware/zmk). The Kinesis fork is regularly updated to bring the latest updates and changes from base ZMK however will not always be completely up to date, some features such as new keycodes will not be immediately available on the 360 Pro after they are implemented in base ZMK.
+Older versions of this repository referenced a customised ZMK fork. This module targets upstream ZMK and keeps the Advantage 360 Pro board definitions and board-specific status LED support out of tree. Local and CI builds must either pass `-DZMK_EXTRA_MODULES=<repo root>` to `west build` or include this module from a west manifest.
 
-Whilst the Advantage 360 Pro is compatible with base ZMK (The pull request to merge it can be seen [here](https://github.com/zmkfirmware/zmk/pull/1454) if you want to see how to implement it) some of the more advanced features (the indicator RGB leds) will not work, and Kinesis cannot provide customer service for usage of base ZMK. Likewise the ZMK community cannot provide support for either the Kinesis keymap editor, nor any usage of the Kinesis custom fork.
+# DISCLAIMER
 
-## Other support
-
-Further support resources can be found on Kinesis.com:
-
-* https://kinesis-ergo.com/support/kb360pro/#firmware-updates
-* https://kinesis-ergo.com/support/kb360pro/#manuals
-
-In the event of a hardware issue it may be necessary to open a support ticket directly with Kinesis as opposed to a GitHub issue in this repository.
-* https://kinesis-ergo.com/support/kb360pro/#ticket
-
+This repo is a ZMK-module-compliant version of Kinesis's ZMK fork in order to help catching up with upstream changes. Please do not seek official support for this firmware!

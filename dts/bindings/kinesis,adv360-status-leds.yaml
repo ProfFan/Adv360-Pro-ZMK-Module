@@ -1,0 +1,12 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: Kinesis Adv360 RGB status LED strip controller
+
+compatible: "kinesis,adv360-status-leds"
+
+properties:
+  led-strip:
+    type: phandle
+    required: true
+    description: WS2812 LED strip device used for the three Adv360 status LEDs

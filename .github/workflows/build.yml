@@ -31,7 +31,7 @@ jobs:
             zephyr/
             bootloader/
             zmk/
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('manifest-dir/west.yml') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('config/west.yml') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
@@ -43,11 +43,11 @@ jobs:
       - name: West Zephyr export
         run: west zephyr-export
       - name: West Build (left)
-        run: west build -s zmk/app -d build/left -b adv360_left -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+        run: west build -s zmk/app -d build/left -b adv360_left/nrf52840/zmk -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE}"
       - name: Adv360 Left Kconfig file
         run: grep -vE '(^#|^$)' build/left/zephyr/.config
       - name: West Build (right)
-        run: west build -s zmk/app -d build/right -b adv360_right -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+        run: west build -s zmk/app -d build/right -b adv360_right/nrf52840/zmk -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE}"
       - name: Adv360 Right Kconfig file
         run: grep -vE '(^#|^$)' build/right/zephyr/.config
       - name: Rename zmk.uf2
@@ -87,7 +87,7 @@ jobs:
             zephyr/
             bootloader/
             zmk/
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('manifest-dir/west.yml') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('config/west.yml') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
@@ -99,11 +99,11 @@ jobs:
       - name: West Zephyr export
         run: west zephyr-export
       - name: West Build (left)
-        run: west build -s zmk/app -d build/left -b adv360_left -S studio-rpc-usb-uart -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" -DCONFIG_ZMK_STUDIO=y
+        run: west build -s zmk/app -d build/left -b adv360_left/nrf52840/zmk -S studio-rpc-usb-uart -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE}" -DCONFIG_ZMK_STUDIO=y
       - name: Adv360 Left Kconfig file
         run: grep -vE '(^#|^$)' build/left/zephyr/.config
       - name: West Build (right)
-        run: west build -s zmk/app -d build/right -b adv360_right -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+        run: west build -s zmk/app -d build/right -b adv360_right/nrf52840/zmk -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE}"
       - name: Adv360 Right Kconfig file
         run: grep -vE '(^#|^$)' build/right/zephyr/.config
       - name: Rename zmk.uf2

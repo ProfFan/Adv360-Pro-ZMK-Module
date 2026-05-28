@@ -1,0 +1,13 @@
+boards:
+  - name: adv360_left
+    vendor: kinesis
+    socs:
+      - name: nrf52840
+        variants:
+          - name: zmk
+  - name: adv360_right
+    vendor: kinesis
+    socs:
+      - name: nrf52840
+        variants:
+          - name: zmk

@@ -1,0 +1,8 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: Kinesis Adv360 status LED behavior
+
+compatible: "kinesis,behavior-adv360-status-tap"
+
+include: one_param.yaml

@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: MIT
+
+config ZMK_ADV360_STATUS_LEDS
+    bool "Kinesis Adv360 status LEDs"
+    default y
+    depends on DT_HAS_KINESIS_ADV360_STATUS_LEDS_ENABLED
+    select LED_STRIP
+    select ZMK_EXT_POWER
+    select ZMK_BATTERY_REPORTING
+    select ZMK_HID_INDICATORS
+
+if ZMK_ADV360_STATUS_LEDS
+
+config ZMK_ADV360_STATUS_LEDS_ON_START
+    bool "Turn Adv360 status LEDs on at startup"
+    default y
+
+config ZMK_ADV360_STATUS_LEDS_BRIGHTNESS
+    int "Adv360 status LED brightness in percent"
+    range 1 100
+    default 20
+
+endif # ZMK_ADV360_STATUS_LEDS
