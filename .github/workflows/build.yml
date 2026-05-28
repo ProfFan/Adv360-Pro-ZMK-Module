@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: zmkfirmware/zmk-build-arm:stable
-    name: Build (Legacy)
+    name: Build (Module)
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -13,7 +13,7 @@ Certain ZMK features (e.g. combos) require knowing the exact key positions in th
 
 ### Setup
 
-1. Fork this repo.
+1. Fork this module repository.
 2. Enable GitHub Actions on your fork.
 
 ### Build firmware
@@ -21,7 +21,78 @@ Certain ZMK features (e.g. combos) require knowing the exact key positions in th
 1. Push a commit to trigger the build.
 2. Download the artifact.
 
+The workflow builds this module against upstream ZMK from [config/west.yml](config/west.yml). You do not need a ZMK fork.
+
+## Building the Firmware Locally
+
+This repository is a ZMK module. Build it from the module checkout and let west fetch upstream ZMK from [config/west.yml](config/west.yml).
+
+### Setup
+
+Install the normal ZMK/Zephyr build dependencies, including `west` and an Arm embedded toolchain. Then run the west setup once from the root of this repository:
+
+```shell
+west init -l config
+west update
+west zephyr-export
+```
+
+### Building both halves
+
+Generate the version macro, build the left half with ZMK Studio/Clique support, and build the right half as a normal split peripheral:
+
+```shell
+bin/get_version_local.sh clique
+
+west build -s zmk/app -p -d build/left \
+  -b adv360_left/nrf52840/zmk \
+  -S studio-rpc-usb-uart \
+  -- \
+  -DZMK_CONFIG="${PWD}/config" \
+  -DZMK_EXTRA_MODULES="${PWD}" \
+  -DCONFIG_ZMK_STUDIO=y
+
+west build -s zmk/app -p -d build/right \
+  -b adv360_right/nrf52840/zmk \
+  -- \
+  -DZMK_CONFIG="${PWD}/config" \
+  -DZMK_EXTRA_MODULES="${PWD}"
+```
+
+The UF2 files are generated at:
+
+* `build/left/zephyr/zmk.uf2`
+* `build/right/zephyr/zmk.uf2`
+
+If you used `bin/get_version_local.sh`, restore `config/version.dtsi` before committing unrelated keymap changes:
+
+```shell
+git checkout -- config/version.dtsi
+```
+
+### Building from an existing ZMK checkout
+
+If you already have an upstream ZMK checkout, build from the ZMK repository directory and point `ZMK_EXTRA_MODULES` at this module checkout:
+
+```shell
+west build -s app -p -d build/adv360_left \
+  -b adv360_left/nrf52840/zmk \
+  -S studio-rpc-usb-uart \
+  -- \
+  -DZMK_CONFIG="/path/to/Adv360-Pro-ZMK/config" \
+  -DZMK_EXTRA_MODULES="/path/to/Adv360-Pro-ZMK" \
+  -DCONFIG_ZMK_STUDIO=y
+
+west build -s app -p -d build/adv360_right \
+  -b adv360_right/nrf52840/zmk \
+  -- \
+  -DZMK_CONFIG="/path/to/Adv360-Pro-ZMK/config" \
+  -DZMK_EXTRA_MODULES="/path/to/Adv360-Pro-ZMK"
+```
+
 ## Building the Firmware in a local container
+
+The container build is a convenience wrapper around the same module workflow above. It does not use a ZMK fork.
 
 ### Setup
 
@@ -65,7 +136,7 @@ sudo apt-get install docker make
 
 ### Cleanup
 
-The built docker container and compiled firmware files can be deleted with `make clean`. This might be necessary if you updated your fork from V2.0 to V3.0 and are encountering build failures.
+The built docker container and compiled firmware files can be deleted with `make clean`. This might be necessary if you updated this module and are encountering build failures.
 
 Creating the docker container takes some time. Therefore `make clean_firmware` can be used to only clean firmware without removing the docker container. Similarly `make clean_image` can be used to remove the docker container without removing compiled firmware files.
 
@@ -142,8 +213,8 @@ In the event of a major update the beta branch may not be compatible with the cu
 
 ## Note
 
-Older versions of this repository referenced a customised ZMK fork. This module targets upstream ZMK and keeps the Advantage 360 Pro board definitions and board-specific status LED support out of tree. Local and CI builds must either pass `-DZMK_EXTRA_MODULES=<repo root>` to `west build` or include this module from a west manifest.
+Older versions of this repository referenced a customised ZMK fork. This module targets upstream ZMK and keeps the Advantage 360 Pro board definitions and board-specific status LED support out of tree. Local and CI builds pass `-DZMK_EXTRA_MODULES=<repo root>` to `west build` or include this module from a west manifest.
 
 # DISCLAIMER
 
-This repo is a ZMK-module-compliant version of Kinesis's ZMK fork in order to help catching up with upstream changes. Please do not seek official support for this firmware!
+This repo packages Advantage 360 Pro support as an external ZMK module to track upstream ZMK without carrying a ZMK fork. Please do not seek official support for this firmware!
